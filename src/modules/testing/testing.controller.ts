@@ -7,6 +7,7 @@ import { DataSource } from 'typeorm';
 @Controller('testing')
 export class TestingController {
   constructor(@InjectDataSource() private dataSource: DataSource) {
+    console.log('TestingController зарегистрирован');
     // @InjectConnection()
     // private readonly databaseConnection: any,
     // Connection,
@@ -15,25 +16,10 @@ export class TestingController {
   @Delete('all-data')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteAll() {
-    // const tables = [
-    //   'blog',
-    //   'comment',
-    //   'like',
-    //   'post',
-    //   'session',
-    //   'user',
-    //   'email_confirmation',
-    //   'password_recovery',
-    // ];
-
-    // const truncatePromises = tables.map((table) =>
-    //   this.dataSource.query(`TRUNCATE "${table}" RESTART IDENTITY CASCADE`),
-    // );
-
-    // await Promise.all(truncatePromises);
+    console.log('DELETE /api/testing/all-data вызван');
 
     await this.dataSource.query(`
-  TRUNCATE blog, comment, post, "like", session, "user", email_confirmation, password_recovery
+  TRUNCATE game, player_progress, question, answer, blog, comment, post, "like", session, "user", email_confirmation, password_recovery
   RESTART IDENTITY CASCADE;
 `);
 

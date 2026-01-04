@@ -12,6 +12,8 @@ import { PasswordRecovery } from './password-recovery.entity';
 import { Session } from '../session/session.entity';
 import { Comment } from 'src/modules/bloggers-platform/domain/comment/comment.entity';
 import { Like } from 'src/modules/bloggers-platform/domain/like/like.entity';
+import { Game } from 'src/modules/quiz/domain/game/game.entity';
+import { PlayerProgress } from 'src/modules/quiz/domain/player-progress/player-progress.entity';
 
 export const loginConstraints = {
   minLength: 3,
@@ -59,6 +61,13 @@ export class User extends BaseDomainEntity {
   })
   public likes: Like[];
 
+  //-----
+  //quiz
+  @OneToMany((type) => PlayerProgress, (pp) => pp.user, {
+    cascade: true,
+  })
+  public playerProgresses: PlayerProgress[];
+
   static createInstance(dto: CreateUserDomainDto): User {
     const user = new this();
 
@@ -75,20 +84,6 @@ export class User extends BaseDomainEntity {
     user.passwordRecoveries = [];
 
     return user;
-  }
-
-  update(dto: UpdateUserDto) {
-    // if (dto.email !== this.email) {
-    //   this.emailConfirmation.isConfirmed = false;
-    //   this.email = dto.email;
-    // }
-  }
-
-  makeDeleted() {
-    // if (this.deletedAt !== null) {
-    //   throw new Error('Entity already deleted');
-    // }
-    // this.deletedAt = new Date();
   }
 
   setEmailConfirmationCode(code: string, expirationDate: Date): void {

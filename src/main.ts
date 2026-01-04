@@ -11,7 +11,7 @@ async function bootstrap() {
   // const app = await NestFactory.create(AppModule);
 
   const dynamicAppModule = await initAppModule();
-  // создаём на основе донастроенного модуля наше приложение
+  // создаём на основе донастроенного модуля приложение
   const app = await NestFactory.create(dynamicAppModule);
 
   appSetup(app);

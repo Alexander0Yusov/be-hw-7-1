@@ -112,6 +112,9 @@ export class CoreConfig {
     this.includeTestingModule = Boolean(
       this.configService.get('INCLUDE_TESTING_MODULE'),
     );
+
+    console.log('INCLUDE_TESTING_MODULE =', this.includeTestingModule);
+
     this.accessTokenExpireIn = this.configService.get('ACCESS_TOKEN_EXPIRE_IN');
     this.refreshTokenExpireIn = this.configService.get(
       'REFRESH_TOKEN_EXPIRE_IN',

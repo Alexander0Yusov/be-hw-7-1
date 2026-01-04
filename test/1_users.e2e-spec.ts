@@ -1,49 +1,33 @@
-import { HttpStatus, INestApplication } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
+import { INestApplication, HttpStatus } from '@nestjs/common';
 import request from 'supertest';
-import { App } from 'supertest/types';
-import mongoose from 'mongoose';
-import { UsersTestManager } from './helpers/users-test-manager';
-import { initSettings } from './helpers/init-settings';
-import { JwtService } from '@nestjs/jwt';
+import { AppModule } from '../src/app.module';
+import { appSetup } from '../src/setup/app.setup';
 import { deleteAllData } from './helpers/delete-all-data';
-import { UserInputDto } from 'src/modules/user-accounts/dto/user/user-input.dto';
-import { GLOBAL_PREFIX } from '../src/setup/global-prefix.setup';
-import { PaginatedViewDto } from '../src/core/dto/base.paginated.view-dto';
-import {
-  MeViewDto,
-  UserViewDto,
-} from '../src/modules/user-accounts/dto/user/user-view.dto';
-import { delay } from './helpers/delay';
-import { EmailService } from '../src/modules/mailer/email.service';
-import { EmailServiceMock } from './mock/email-service.mock';
-import { ACCESS_TOKEN_STRATEGY_INJECT_TOKEN } from 'src/modules/user-accounts/constants/auth-tokens.inject-constants';
-import { CoreConfig } from 'src/core/core.config';
+import { createFakeUser } from 'src/testing/utils/users/create-fake-user';
+import { GLOBAL_PREFIX } from 'src/setup/global-prefix.setup';
+import { initTestApp } from './helpers/init-test-app';
 
 describe('users (e2e)', () => {
-  let app: INestApplication<App>;
-  let userTestManger: UsersTestManager;
-  let emailServiceMock: EmailServiceMock;
+  let app: INestApplication;
 
   beforeAll(async () => {
-    const result = await initSettings((moduleBuilder) =>
-      moduleBuilder
-        .overrideProvider(ACCESS_TOKEN_STRATEGY_INJECT_TOKEN)
-        .useFactory({
-          factory: (coreConfig: CoreConfig) => {
-            return new JwtService({
-              secret: coreConfig.accessTokenSecret,
-              signOptions: { expiresIn: '2s' },
-            });
-          },
-          inject: [CoreConfig],
-        }),
-    );
+    // // тестовый модуль
+    // const moduleRef = await Test.createTestingModule({
+    //   imports: [AppModule],
+    // }).compile();
 
-    app = result.app;
-    userTestManger = result.userTestManger;
+    // // приложение
+    // app = moduleRef.createNestApplication();
 
-    // этот мок вызывается в боевом коде если ему дать
-    // emailServiceMock = app.get(EmailService) as EmailServiceMock;
+    // // настройка пайпов, фильтров итд
+    // appSetup(app);
+
+    // // запуск прил
+    // await app.init();
+
+    // нужно вот так настроенное прил, те с учетом динамического добавления тест модуля
+    app = await initTestApp();
   });
 
   beforeEach(async () => {
@@ -51,110 +35,58 @@ describe('users (e2e)', () => {
   });
 
   afterAll(async () => {
-    await mongoose.disconnect();
     await app.close();
   });
 
-  // it('should get users with paging', async () => {
-  //   const users = await userTestManger.createSeveralUsers(12);
-
-  //   const { body: responseBody } = (await request(app.getHttpServer())
-  //     .get(`/${GLOBAL_PREFIX}/users?pageNumber=2&sortDirection=asc`)
-  //     .auth('admin', 'qwerty')
-  //     .expect(HttpStatus.OK)) as { body: PaginatedViewDto<UserViewDto> };
-
-  //   expect(responseBody.totalCount).toBe(12);
-  //   expect(responseBody.items).toHaveLength(2);
-  //   expect(responseBody.pagesCount).toBe(2);
-  //   //asc sorting
-  //   expect(responseBody.items[1]).toEqual(users[users.length - 1]);
-  //   //etc...
-  // });
-
-  // it('should return users info while "me" request with correct accessTokens', async () => {
-  //   const tokens = await userTestManger.createAndLoginSeveralUsers(1);
-
-  //   const responseBody = await userTestManger.me(tokens[0].accessToken);
-
-  //   expect(responseBody).toEqual({
-  //     login: expect.anything(),
-  //     userId: expect.anything(),
-  //     email: expect.anything(),
-  //   } as MeViewDto);
-  // });
-
-  // it(`shouldn't return users info while "me" request if accessTokens expired`, async () => {
-  //   const tokens = await userTestManger.createAndLoginSeveralUsers(1);
-  //   await delay(2000);
-  //   await userTestManger.me(tokens[0].accessToken, HttpStatus.UNAUTHORIZED);
-  // });
-
-  // it(`should register user without really send email`, async () => {
-  //   await request(app.getHttpServer())
-  //     .post(`/${GLOBAL_PREFIX}/auth/registration`)
-  //     .send({
-  //       email: 'email@email.em',
-  //       password: '123123123',
-  //       login: 'login123',
-  //     } as UserInputDto)
-  //     .expect(HttpStatus.CREATED);
-  // });
-
-  // it(`should call email sending method while registration`, async () => {
-  //   EmailServiceMock.sendConfirmationEmailMock.mockReset();
-
-  //   await request(app.getHttpServer())
-  //     .post(`/${GLOBAL_PREFIX}/auth/registration`)
-  //     .send({
-  //       email: 'email@email.em',
-  //       password: '123123123',
-  //       login: 'login123',
-  //     })
-  //     .expect(HttpStatus.CREATED);
-
-  //   expect(EmailServiceMock.sendConfirmationEmailMock).toHaveBeenCalled();
-  // });
-
-  // it('should send a letter if user exists but not confirmed', async () => {
-  //   const body: UserInputDto = {
-  //     login: 'yusovsky',
-  //     password: 'qwerty',
-  //     email: 'yusovsky2@gmail.com',
-  //   };
-
-  //   await userTestManger.createUser(body);
-
-  //   const response = await request(app.getHttpServer())
-  //     .post(`/${GLOBAL_PREFIX}/auth/registration-email-resending`)
-  //     .send({ email: 'yusovsky2@gmail.com' })
-  //     .expect(204);
-
-  // console.log(2222, response.body);
-
-  // expect(response).toEqual({
-  //   login: body.login,
-  //   email: body.email,
-  //   id: expect.any(String),
-  //   createdAt: expect.any(String),
-  // });
-  // });
-
-  it('should create user', async () => {
-    const body: UserInputDto = {
-      login: 'name1s',
-      password: 'qwerty',
-      email: 'emails@email.em',
+  it('should create question', async () => {
+    const newQuestion = {
+      body: 'stringstri',
+      correctAnswers: ['string'],
     };
 
-    const response = await userTestManger.createUser(body);
+    const createdQuestion = await request(app.getHttpServer())
+      .post(`/${GLOBAL_PREFIX}/sa/quiz/questions`)
+      .send(newQuestion)
+      .auth('admin', 'qwerty')
+      .expect(HttpStatus.CREATED);
 
-    console.log(11111, response);
-
-    expect(response).toEqual({
-      login: body.login,
-      email: body.email,
-      id: expect.any(String),
-      createdAt: expect.any(String),
-    });
+    const updatedQuestion = await request(app.getHttpServer())
+      .put(`/${GLOBAL_PREFIX}/sa/quiz/questions/${createdQuestion.body.id}`)
+      .send(newQuestion)
+      .auth('admin', 'qwerty')
+      .expect(HttpStatus.NO_CONTENT);
   });
+
+  // it('should create user', async () => {
+  //   // создание и логин юзера
+  //   const newUser = createFakeUser('2');
+
+  //   const createdUser = await request(app.getHttpServer())
+  //     .post(`/${GLOBAL_PREFIX}/sa/users`)
+  //     .send(newUser)
+  //     .auth('admin', 'qwerty')
+  //     .expect(HttpStatus.CREATED);
+
+  //   console.log(9999, createdUser.body);
+
+  //   const loginResponse = await request(app.getHttpServer())
+  //     .post(`/${GLOBAL_PREFIX}/auth/login`)
+  //     .send({ loginOrEmail: newUser.email, password: newUser.password })
+  //     .expect(HttpStatus.OK);
+
+  //   // accessToken из тела
+  //   const accessToken = loginResponse.body.accessToken; // refreshToken из cookie
+
+  //   const rawCookies = loginResponse.headers['set-cookie'];
+  //   const cookies = Array.isArray(rawCookies) ? rawCookies : [rawCookies];
+  //   const refreshTokenCookie = cookies.find((c) =>
+  //     c.startsWith('refreshToken='),
+  //   );
+  //   const refreshToken = refreshTokenCookie
+  //     ?.split(';')[0]
+  //     .replace('refreshToken=', '');
+
+  //   console.log('accessToken:', accessToken);
+  //   console.log('refreshToken:', refreshToken);
+  // });
 });

@@ -13,7 +13,7 @@ import { CoreModule } from './core/core.module';
 import { CoreConfig } from './core/core.config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './modules/user-accounts/domain/user/user.entity';
+import { QuizModule } from './modules/quiz/quiz.module';
 
 // nest g module modules/user-accounts
 // nest g controller modules/user-accounts --no-spec
@@ -21,18 +21,6 @@ import { User } from './modules/user-accounts/domain/user/user.entity';
 
 @Module({
   imports: [
-    // TypeOrmModule.forRoot({
-    //   type: 'postgres',
-    //   host: 'localhost',
-    //   port: 5432,
-    //   username: 'postgres',
-    //   password: 'sa',
-    //   database: 'bloggers_platform',
-    //   synchronize: true, // ❗ Только для разработки
-    //   autoLoadEntities: true,
-    //   logging: true,
-    // }),
-
     // эту хрень в статик асинк модуля этого вроде как
     TypeOrmModule.forRootAsync({
       imports: [CoreModule],
@@ -47,7 +35,7 @@ import { User } from './modules/user-accounts/domain/user/user.entity';
           // entities: [__dirname + '/../**/*.entity.{ts,js}'], // либо поштучно перчислить каждую сущность
           synchronize: true, // ❗ Только для разработки
           autoLoadEntities: true,
-          logging: true,
+          // logging: true,
         };
       },
       inject: [CoreConfig],
@@ -69,12 +57,15 @@ import { User } from './modules/user-accounts/domain/user/user.entity';
     MailerModule,
     CoreModule,
     configModule,
+    QuizModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {
   static async forRoot(coreConfig: CoreConfig): Promise<DynamicModule> {
+    console.log('TestingModule подключён?', coreConfig.includeTestingModule);
+
     return {
       module: AppModule,
       imports: [...(coreConfig.includeTestingModule ? [TestingModule] : [])],
