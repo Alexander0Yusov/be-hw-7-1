@@ -21,4 +21,19 @@ export class GamesRepository {
       where: { status: status },
     });
   }
+
+  async findActiveGame(userId: number): Promise<Game | null> {
+    const activeGame = await this.gameRepo
+      .createQueryBuilder('game')
+      .leftJoinAndSelect('game.firstPlayerProgress', 'fpp')
+      .leftJoinAndSelect('fpp.answers', 'fppAnswers') // ответы первого игрока
+      .leftJoinAndSelect('game.secondPlayerProgress', 'spp')
+      .leftJoinAndSelect('spp.answers', 'sppAnswers') // ответы второго игрока
+      .leftJoinAndSelect('game.questions', 'questions')
+      .where('(fpp.userId = :userId OR spp.userId = :userId)', { userId })
+      .andWhere('game.status = :status', { status: GameStatuses.Active })
+      .getOne();
+
+    return activeGame;
+  }
 }

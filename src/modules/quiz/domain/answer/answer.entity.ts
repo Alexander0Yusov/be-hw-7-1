@@ -20,6 +20,31 @@ export class Answer extends BaseDomainEntity {
   })
   question: Question;
 
+  @Column()
+  questionId: number;
+
   @ManyToOne(() => PlayerProgress, (pp) => pp.answers, { onDelete: 'CASCADE' })
   playerProgress: PlayerProgress;
+
+  @Column()
+  playerProgressId: number;
+
+  static createInstance(
+    body: string,
+    status: AnswerStatuses,
+    questionId: number,
+    playerProgressId: number,
+  ): Answer {
+    const answer = new Answer();
+    answer.body = body;
+    answer.status = status;
+    answer.questionId = questionId;
+    answer.playerProgressId = playerProgressId;
+
+    // если нужно сразу связать сущности (stub-объекты)
+    answer.question = { id: questionId } as Question;
+    answer.playerProgress = { id: playerProgressId } as PlayerProgress;
+
+    return answer;
+  }
 }

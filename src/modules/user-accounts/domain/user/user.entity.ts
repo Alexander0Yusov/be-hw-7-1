@@ -1,7 +1,4 @@
-import {
-  CreateUserDomainDto,
-  UpdateUserDto,
-} from '../../dto/user/create-user-domain.dto';
+import { CreateUserDomainDto } from '../../dto/user/create-user-domain.dto';
 import { addDays } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -12,7 +9,6 @@ import { PasswordRecovery } from './password-recovery.entity';
 import { Session } from '../session/session.entity';
 import { Comment } from 'src/modules/bloggers-platform/domain/comment/comment.entity';
 import { Like } from 'src/modules/bloggers-platform/domain/like/like.entity';
-import { Game } from 'src/modules/quiz/domain/game/game.entity';
 import { PlayerProgress } from 'src/modules/quiz/domain/player-progress/player-progress.entity';
 
 export const loginConstraints = {

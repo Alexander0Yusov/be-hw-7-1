@@ -65,7 +65,7 @@ export class Game extends BaseDomainEntity {
       .limit(2)
       .getMany();
 
-    randomQuestions.forEach((q) => (q.game = this));
+    randomQuestions.sort((a, b) => a.id - b.id).forEach((q) => (q.game = this));
 
     this.questions = randomQuestions;
   }

@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { Answer } from '../answer/answer.entity';
 import { Game } from '../game/game.entity';
-import { QuestionInputDto } from '../../dto/question/question-create.dto';
+import { QuestionInputDto } from '../../dto/question/question-input.dto';
 import { QuestionUpdateStatusDto } from '../../dto/question/question-update-status.dto';
 
 @Entity()

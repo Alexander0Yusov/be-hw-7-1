@@ -44,7 +44,7 @@ export class PostConnectionViewDto {
       answers: pp.answers.map((a) => ({
         questionId: a.question.id.toString(),
         answerStatus: a.status,
-        addetAt: a.createdAt.toISOString(),
+        addedAt: a.createdAt.toISOString(),
       })),
     };
   }

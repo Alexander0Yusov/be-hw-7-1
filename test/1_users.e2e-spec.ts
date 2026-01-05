@@ -75,6 +75,18 @@ describe('users (e2e)', () => {
       .auth('admin', 'qwerty')
       .expect(HttpStatus.CREATED);
 
+    //
+    const newQuestion_4 = {
+      body: 'capital of Albania',
+      correctAnswers: ['Tirana'],
+    };
+
+    await request(app.getHttpServer())
+      .post(`/${GLOBAL_PREFIX}/sa/quiz/questions`)
+      .send(newQuestion_4)
+      .auth('admin', 'qwerty')
+      .expect(HttpStatus.CREATED);
+
     // updatedQuestion
     await request(app.getHttpServer())
       .put(`/${GLOBAL_PREFIX}/sa/quiz/questions/${createdQuestion.body.id}`)
@@ -108,6 +120,9 @@ describe('users (e2e)', () => {
       .expect(HttpStatus.NO_CONTENT);
   });
 
+  let accessToken_1;
+  let accessToken_2;
+
   it('should create game', async () => {
     // создание и логин юзера 1
     const newUser_1 = createFakeUser('1');
@@ -124,7 +139,7 @@ describe('users (e2e)', () => {
       .expect(HttpStatus.OK);
 
     // accessToken из тела
-    const accessToken_1 = loginResponse.body.accessToken;
+    accessToken_1 = loginResponse.body.accessToken;
 
     // создание игры
     const createGame = await request(app.getHttpServer())
@@ -149,12 +164,25 @@ describe('users (e2e)', () => {
       .expect(HttpStatus.OK);
 
     // accessToken из тела
-    const accessToken_2 = loginResponse_2.body.accessToken;
+    accessToken_2 = loginResponse_2.body.accessToken;
 
     // создание игры
     const connectToGame = await request(app.getHttpServer())
       .post(`/${GLOBAL_PREFIX}/pair-game-quiz/pairs/connection`)
       .auth(accessToken_2, { type: 'bearer' })
+      .expect(HttpStatus.OK);
+  });
+
+  it('should make answer', async () => {
+    // создание ответа
+    const answer = {
+      answer: 'washington',
+    };
+
+    await request(app.getHttpServer())
+      .post(`/${GLOBAL_PREFIX}/pair-game-quiz/pairs/my-current/answers`)
+      .send(answer)
+      .auth(accessToken_1, { type: 'bearer' })
       .expect(HttpStatus.OK);
   });
 });

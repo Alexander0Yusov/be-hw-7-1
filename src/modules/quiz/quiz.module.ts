@@ -19,6 +19,9 @@ import { PairGameQuizController } from './api/pair-game-quiz.controller';
 import { ConnectOrCreatePairUseCase } from './application/usecases/games/connect-or-create-pair.usecase';
 import { GamesRepository } from './infrastructure/games.repository';
 import { GamesQueryRepository } from './infrastructure/query/games-query.repository';
+import { MakeAnswerUseCase } from './application/usecases/answers/make-answer.usecase';
+import { AnswersRepository } from './infrastructure/answers.repository';
+import { AnswersQueryRepository } from './infrastructure/query/answers-query.repository';
 
 export const CommandHandlers = [
   CreateQuestionUseCase,
@@ -28,6 +31,7 @@ export const CommandHandlers = [
   GetQuestionHandler,
   //
   ConnectOrCreatePairUseCase,
+  MakeAnswerUseCase,
 ];
 
 @Module({
@@ -43,6 +47,9 @@ export const CommandHandlers = [
     //
     GamesRepository,
     GamesQueryRepository,
+    //
+    AnswersRepository,
+    AnswersQueryRepository,
     ...CommandHandlers,
   ],
 })

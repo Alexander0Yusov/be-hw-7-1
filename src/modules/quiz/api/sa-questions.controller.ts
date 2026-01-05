@@ -16,7 +16,7 @@ import { CommentUpdateDto } from 'src/modules/bloggers-platform/dto/comment/comm
 import { BasicAuthGuard } from 'src/modules/user-accounts/guards/basic/basi-auth.guard';
 import { ExtractUserFromRequest } from 'src/modules/user-accounts/guards/decorators/param/extract-user-from-request.decorator';
 import { UserContextDto } from 'src/modules/user-accounts/guards/dto/user-context.dto';
-import { QuestionInputDto } from '../dto/question/question-create.dto';
+import { QuestionInputDto } from '../dto/question/question-input.dto';
 import { CreateQuestionCommand } from '../application/usecases/questions/create-question.usecase';
 import { QuestionViewDto } from '../dto/question/question-view.dto';
 import { GetQuestionQuery } from '../application/usecases/questions/get-question.query-handler';

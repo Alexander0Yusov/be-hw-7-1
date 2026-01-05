@@ -13,6 +13,10 @@ import { PostConnectionViewDto } from '../dto/game-pair-quiz/post-connection-vie
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ConnectOrCreatePairCommand } from '../application/usecases/games/connect-or-create-pair.usecase';
 import { GamesQueryRepository } from '../infrastructure/query/games-query.repository';
+import { AnswerInputDto } from '../dto/answer/answer-input.dto';
+import { AnswerView } from '../dto/answer/answer-view';
+import { MakeAnswerCommand } from '../application/usecases/answers/make-answer.usecase';
+import { AnswersQueryRepository } from '../infrastructure/query/answers-query.repository';
 
 @Controller('pair-game-quiz/pairs')
 export class PairGameQuizController {
@@ -20,7 +24,7 @@ export class PairGameQuizController {
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     //  private usersService: UsersService,
-    //  private usersRepository: UsersRepository,
+    private answersQueryRepository: AnswersQueryRepository,
     private gamesQueryRepository: GamesQueryRepository,
   ) {}
 
@@ -41,5 +45,26 @@ export class PairGameQuizController {
     console.log(22222, game);
 
     return game;
+  }
+
+  @Post('my-current/answers')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async postAnswer(
+    @ExtractUserFromRequest() user: UserContextDto,
+    @Body() body: AnswerInputDto,
+  ): Promise<AnswerView> {
+    const answerId = await this.commandBus.execute(
+      new MakeAnswerCommand(body, user.id),
+    );
+
+    //  return await this.queryBus.execute(new GetQuestionQuery(questionId));
+
+    const answer =
+      await this.answersQueryRepository.findByIdOrNotFoundFail(answerId);
+
+    console.log(22222, answer);
+
+    return answer;
   }
 }
