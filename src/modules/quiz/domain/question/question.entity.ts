@@ -9,6 +9,7 @@ import {
 import { Answer } from '../answer/answer.entity';
 import { Game } from '../game/game.entity';
 import { QuestionInputDto } from '../../dto/question/question-create.dto';
+import { QuestionUpdateStatusDto } from '../../dto/question/question-update-status.dto';
 
 @Entity()
 export class Question extends BaseDomainEntity {
@@ -40,5 +41,9 @@ export class Question extends BaseDomainEntity {
   update(dto: QuestionInputDto) {
     this.body = dto.body;
     this.correctAnswers = dto.correctAnswers;
+  }
+
+  updateStatus(dto: QuestionUpdateStatusDto) {
+    this.publish = dto.published;
   }
 }

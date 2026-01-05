@@ -31,62 +31,130 @@ describe('users (e2e)', () => {
   });
 
   beforeEach(async () => {
-    await deleteAllData(app);
+    // await deleteAllData(app);
   });
 
   afterAll(async () => {
+    await deleteAllData(app);
     await app.close();
   });
 
   it('should create question', async () => {
-    const newQuestion = {
-      body: 'stringstri',
-      correctAnswers: ['string'],
+    const newQuestion_1 = {
+      body: 'capital of GB',
+      correctAnswers: ['London'],
     };
 
     const createdQuestion = await request(app.getHttpServer())
       .post(`/${GLOBAL_PREFIX}/sa/quiz/questions`)
-      .send(newQuestion)
+      .send(newQuestion_1)
       .auth('admin', 'qwerty')
       .expect(HttpStatus.CREATED);
 
-    const updatedQuestion = await request(app.getHttpServer())
+    //
+    const newQuestion_2 = {
+      body: 'capital of USA',
+      correctAnswers: ['Washington'],
+    };
+
+    await request(app.getHttpServer())
+      .post(`/${GLOBAL_PREFIX}/sa/quiz/questions`)
+      .send(newQuestion_2)
+      .auth('admin', 'qwerty')
+      .expect(HttpStatus.CREATED);
+
+    //
+    const newQuestion_3 = {
+      body: 'capital of Spain',
+      correctAnswers: ['Madrid'],
+    };
+
+    await request(app.getHttpServer())
+      .post(`/${GLOBAL_PREFIX}/sa/quiz/questions`)
+      .send(newQuestion_3)
+      .auth('admin', 'qwerty')
+      .expect(HttpStatus.CREATED);
+
+    // updatedQuestion
+    await request(app.getHttpServer())
       .put(`/${GLOBAL_PREFIX}/sa/quiz/questions/${createdQuestion.body.id}`)
-      .send(newQuestion)
+      .send(newQuestion_1)
+      .auth('admin', 'qwerty')
+      .expect(HttpStatus.NO_CONTENT);
+
+    // updatedStatusQuestion
+    await request(app.getHttpServer())
+      .put(
+        `/${GLOBAL_PREFIX}/sa/quiz/questions/${createdQuestion.body.id}/publish`,
+      )
+      .send({ published: true })
+      .auth('admin', 'qwerty')
+      .expect(HttpStatus.NO_CONTENT);
+
+    // get all questions
+    const ff = await request(app.getHttpServer())
+      .get(
+        `/${GLOBAL_PREFIX}/sa/quiz/questions?bodySearchTerm=cap&publishedStatus=all`,
+      )
+      .auth('admin', 'qwerty')
+      .expect(HttpStatus.OK);
+
+    console.log(7777, ff.body);
+
+    // deleteQuestion
+    await request(app.getHttpServer())
+      .delete(`/${GLOBAL_PREFIX}/sa/quiz/questions/${createdQuestion.body.id}`)
       .auth('admin', 'qwerty')
       .expect(HttpStatus.NO_CONTENT);
   });
 
-  // it('should create user', async () => {
-  //   // создание и логин юзера
-  //   const newUser = createFakeUser('2');
+  it('should create game', async () => {
+    // создание и логин юзера 1
+    const newUser_1 = createFakeUser('1');
 
-  //   const createdUser = await request(app.getHttpServer())
-  //     .post(`/${GLOBAL_PREFIX}/sa/users`)
-  //     .send(newUser)
-  //     .auth('admin', 'qwerty')
-  //     .expect(HttpStatus.CREATED);
+    await request(app.getHttpServer())
+      .post(`/${GLOBAL_PREFIX}/sa/users`)
+      .send(newUser_1)
+      .auth('admin', 'qwerty')
+      .expect(HttpStatus.CREATED);
 
-  //   console.log(9999, createdUser.body);
+    const loginResponse = await request(app.getHttpServer())
+      .post(`/${GLOBAL_PREFIX}/auth/login`)
+      .send({ loginOrEmail: newUser_1.email, password: newUser_1.password })
+      .expect(HttpStatus.OK);
 
-  //   const loginResponse = await request(app.getHttpServer())
-  //     .post(`/${GLOBAL_PREFIX}/auth/login`)
-  //     .send({ loginOrEmail: newUser.email, password: newUser.password })
-  //     .expect(HttpStatus.OK);
+    // accessToken из тела
+    const accessToken_1 = loginResponse.body.accessToken;
 
-  //   // accessToken из тела
-  //   const accessToken = loginResponse.body.accessToken; // refreshToken из cookie
+    // создание игры
+    const createGame = await request(app.getHttpServer())
+      .post(`/${GLOBAL_PREFIX}/pair-game-quiz/pairs/connection`)
+      .auth(accessToken_1, { type: 'bearer' })
+      .expect(HttpStatus.OK);
+  });
 
-  //   const rawCookies = loginResponse.headers['set-cookie'];
-  //   const cookies = Array.isArray(rawCookies) ? rawCookies : [rawCookies];
-  //   const refreshTokenCookie = cookies.find((c) =>
-  //     c.startsWith('refreshToken='),
-  //   );
-  //   const refreshToken = refreshTokenCookie
-  //     ?.split(';')[0]
-  //     .replace('refreshToken=', '');
+  it('should connect to game', async () => {
+    // создание и логин юзера 2
+    const newUser_2 = createFakeUser('2');
 
-  //   console.log('accessToken:', accessToken);
-  //   console.log('refreshToken:', refreshToken);
-  // });
+    await request(app.getHttpServer())
+      .post(`/${GLOBAL_PREFIX}/sa/users`)
+      .send(newUser_2)
+      .auth('admin', 'qwerty')
+      .expect(HttpStatus.CREATED);
+
+    const loginResponse_2 = await request(app.getHttpServer())
+      .post(`/${GLOBAL_PREFIX}/auth/login`)
+      .send({ loginOrEmail: newUser_2.email, password: newUser_2.password })
+      .expect(HttpStatus.OK);
+
+    // accessToken из тела
+    const accessToken_2 = loginResponse_2.body.accessToken;
+
+    // создание игры
+    const connectToGame = await request(app.getHttpServer())
+      .post(`/${GLOBAL_PREFIX}/pair-game-quiz/pairs/connection`)
+      .auth(accessToken_2, { type: 'bearer' })
+      .expect(HttpStatus.OK);
+  });
 });

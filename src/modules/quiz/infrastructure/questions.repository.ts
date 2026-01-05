@@ -26,11 +26,11 @@ export class QuestionsRepository {
     return question;
   }
 
-  // async deleteOrNotFoundFail(id: string): Promise<void> {
-  //   const result = await this.blogRepo.delete(Number(id));
+  async deleteOrNotFoundFail(id: string): Promise<void> {
+    const result = await this.questionRepo.delete(Number(id));
 
-  //   if (result.affected === 0) {
-  //     throw new NotFoundException(`Blog with id ${id} not found`);
-  //   }
-  // }
+    if (result.affected === 0) {
+      throw new NotFoundException(`Question not found`);
+    }
+  }
 }
