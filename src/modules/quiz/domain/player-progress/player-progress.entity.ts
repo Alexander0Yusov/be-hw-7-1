@@ -28,16 +28,4 @@ export class PlayerProgress extends BaseDomainEntity {
   // одна игра имеет много ответов
   @OneToMany(() => Answer, (a) => a.playerProgress, { cascade: true })
   answers: Answer[];
-
-  // @Column({ nullable: true })
-  // currentQuestionIndex: number;
-
-  // @Column({ default: 0 })
-  // score: number;
-
-  // @Column({ default: 0 })
-  // correctAnswers: number;
-
-  // @Column({ default: 0 })
-  // wrongAnswers: number;
 }

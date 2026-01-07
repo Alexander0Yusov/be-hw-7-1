@@ -1,27 +1,26 @@
 import { BaseDomainEntity } from 'src/core/base-domain-entity/base-domain-entity';
 import { Column, Entity, ManyToOne } from 'typeorm';
 import { PlayerProgress } from '../player-progress/player-progress.entity';
-import { Question } from '../question/question.entity';
 import { AnswerStatuses } from '../../dto/game-pair-quiz/answer-status';
+import { GameQuestion } from '../game-question/game-question.entity';
 
 @Entity()
 export class Answer extends BaseDomainEntity {
-  @Column() body: string; // текст ответа игрока
+  @Column()
+  body: string;
 
   @Column({
     type: 'enum',
     enum: AnswerStatuses,
     default: AnswerStatuses.Incorrect,
   })
-  status: AnswerStatuses; // статус ответа (Correct / Incorrect)
+  status: AnswerStatuses;
 
-  @ManyToOne(() => Question, (question) => question.answers, {
-    onDelete: 'CASCADE',
-  })
-  question: Question;
+  @ManyToOne(() => GameQuestion, (gq) => gq.answers, { onDelete: 'CASCADE' })
+  gameQuestion: GameQuestion;
 
   @Column()
-  questionId: number;
+  gameQuestionId: number;
 
   @ManyToOne(() => PlayerProgress, (pp) => pp.answers, { onDelete: 'CASCADE' })
   playerProgress: PlayerProgress;
@@ -32,17 +31,17 @@ export class Answer extends BaseDomainEntity {
   static createInstance(
     body: string,
     status: AnswerStatuses,
-    questionId: number,
+    gameQuestionId: number,
     playerProgressId: number,
   ): Answer {
     const answer = new Answer();
     answer.body = body;
     answer.status = status;
-    answer.questionId = questionId;
+    answer.gameQuestionId = gameQuestionId;
     answer.playerProgressId = playerProgressId;
 
     // если нужно сразу связать сущности (stub-объекты)
-    answer.question = { id: questionId } as Question;
+    answer.gameQuestion = { id: gameQuestionId } as GameQuestion;
     answer.playerProgress = { id: playerProgressId } as PlayerProgress;
 
     return answer;

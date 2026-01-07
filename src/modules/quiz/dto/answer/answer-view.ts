@@ -8,7 +8,7 @@ export class AnswerView {
 
   static mapToView(dto: Answer): AnswerView {
     return {
-      questionId: dto.questionId.toString(),
+      questionId: dto.gameQuestionId.toString(),
       answerStatus: dto.status,
       addedAt: dto.createdAt.toISOString(),
     };

@@ -10,6 +10,7 @@ import { PlayerProgress } from '../player-progress/player-progress.entity';
 import { Question } from '../question/question.entity';
 import { BaseDomainEntity } from 'src/core/base-domain-entity/base-domain-entity';
 import { GameStatuses } from '../../dto/game-pair-quiz/answer-status';
+import { GameQuestion } from '../game-question/game-question.entity';
 
 @Entity()
 export class Game extends BaseDomainEntity {
@@ -21,8 +22,8 @@ export class Game extends BaseDomainEntity {
   @JoinColumn()
   secondPlayerProgress: PlayerProgress;
 
-  @OneToMany(() => Question, (q) => q.game, { cascade: true })
-  questions: Question[];
+  @OneToMany(() => GameQuestion, (gq) => gq.game, { cascade: true })
+  gameQuestions: GameQuestion[];
 
   @Column({
     type: 'enum',
@@ -65,8 +66,13 @@ export class Game extends BaseDomainEntity {
       .limit(5)
       .getMany();
 
-    randomQuestions.sort((a, b) => a.id - b.id).forEach((q) => (q.game = this));
-
-    this.questions = randomQuestions;
+    this.gameQuestions = randomQuestions
+      .sort((a, b) => a.id - b.id)
+      .map((q) => {
+        const gq = new GameQuestion();
+        gq.game = this; // привязка к текущей игре
+        gq.question = q; // привязка к вопросу из пула
+        return gq;
+      });
   }
 }

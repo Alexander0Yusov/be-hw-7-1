@@ -1,7 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { Question } from '../domain/question/question.entity';
+import { Injectable } from '@nestjs/common';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+
 import { Game } from '../domain/game/game.entity';
 import { GameStatuses } from '../dto/game-pair-quiz/answer-status';
 
@@ -29,7 +29,8 @@ export class GamesRepository {
       .leftJoinAndSelect('fpp.answers', 'fppAnswers') // ответы первого игрока
       .leftJoinAndSelect('game.secondPlayerProgress', 'spp')
       .leftJoinAndSelect('spp.answers', 'sppAnswers') // ответы второго игрока
-      .leftJoinAndSelect('game.questions', 'questions')
+      .leftJoinAndSelect('game.gameQuestions', 'gameQuestions') // связи игра ↔ вопросы
+      .leftJoinAndSelect('gameQuestions.question', 'questions')
       .where('(fpp.userId = :userId OR spp.userId = :userId)', { userId })
       .andWhere('game.status = :status', { status: GameStatuses.Active })
       .getOne();

@@ -19,12 +19,17 @@ export class GamesQueryRepository {
         'firstPlayerProgress',
         'firstPlayerProgress.user',
         'firstPlayerProgress.answers',
-        'firstPlayerProgress.answers.question',
+        'firstPlayerProgress.answers.gameQuestion',
+        'firstPlayerProgress.answers.gameQuestion.question',
+
         'secondPlayerProgress',
         'secondPlayerProgress.user',
         'secondPlayerProgress.answers',
-        'secondPlayerProgress.answers.question',
-        'questions',
+        'secondPlayerProgress.answers.gameQuestion',
+        'secondPlayerProgress.answers.gameQuestion.question',
+
+        'gameQuestions',
+        'gameQuestions.question',
       ],
     });
 
@@ -41,14 +46,17 @@ export class GamesQueryRepository {
     const activeGame = await this.gameRepo
       .createQueryBuilder('game')
       .leftJoinAndSelect('game.firstPlayerProgress', 'fpp')
-      .leftJoinAndSelect('fpp.user', 'fppUser') // ← добавлено
+      .leftJoinAndSelect('fpp.user', 'fppUser')
       .leftJoinAndSelect('fpp.answers', 'fppAnswers')
-      .leftJoinAndSelect('fppAnswers.question', 'fppAnswerQuestion') // ← добавлено
+      .leftJoinAndSelect('fppAnswers.gameQuestion', 'fppAnswerGameQuestion')
+      .leftJoinAndSelect('fppAnswerGameQuestion.question', 'fppAnswerQuestion')
       .leftJoinAndSelect('game.secondPlayerProgress', 'spp')
-      .leftJoinAndSelect('spp.user', 'sppUser') // ← добавлено
+      .leftJoinAndSelect('spp.user', 'sppUser')
       .leftJoinAndSelect('spp.answers', 'sppAnswers')
-      .leftJoinAndSelect('sppAnswers.question', 'sppAnswerQuestion') // ← добавлено
-      .leftJoinAndSelect('game.questions', 'questions')
+      .leftJoinAndSelect('sppAnswers.gameQuestion', 'sppAnswerGameQuestion')
+      .leftJoinAndSelect('sppAnswerGameQuestion.question', 'sppAnswerQuestion')
+      .leftJoinAndSelect('game.gameQuestions', 'gameQuestions')
+      .leftJoinAndSelect('gameQuestions.question', 'questions')
       .where('(fpp.userId = :userId OR spp.userId = :userId)', { userId })
       .andWhere('game.status IN (:...statuses)', {
         statuses: [GameStatuses.Active, GameStatuses.PendingSecondPlayer],

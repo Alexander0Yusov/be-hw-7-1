@@ -5,23 +5,23 @@ import { GameStatuses } from 'src/modules/quiz/dto/game-pair-quiz/answer-status'
 import { PostConnectionViewDto } from 'src/modules/quiz/dto/game-pair-quiz/post-connection-view.dto';
 import { GamesQueryRepository } from 'src/modules/quiz/infrastructure/query/games-query.repository';
 
-export class GetCurrentGameByIdQuery {
+export class GetGameByIdQuery {
   constructor(
     public gameId: string,
     public userId: string,
   ) {}
 }
 
-@QueryHandler(GetCurrentGameByIdQuery)
-export class GetCurrentGameByIdHandler
-  implements IQueryHandler<GetCurrentGameByIdQuery, PostConnectionViewDto>
+@QueryHandler(GetGameByIdQuery)
+export class GetGameByIdHandler
+  implements IQueryHandler<GetGameByIdQuery, PostConnectionViewDto>
 {
   constructor(private gamesQueryRepository: GamesQueryRepository) {}
 
   async execute({
     gameId,
     userId,
-  }: GetCurrentGameByIdQuery): Promise<PostConnectionViewDto> {
+  }: GetGameByIdQuery): Promise<PostConnectionViewDto> {
     const game = await this.gamesQueryRepository.findByIdOrNotFoundFail(gameId);
 
     const isFirst = game.firstPlayerProgress?.player.id === userId;
@@ -42,10 +42,15 @@ export class GetCurrentGameByIdHandler
     // при условии что статус игры "окончена", находим чей последний ответ был раньше,
     // добавляем 1 балл
     const firstPlayerTime = new Date(
-      game.firstPlayerProgress.answers.pop()!.addedAt,
+      game.firstPlayerProgress.answers[
+        game.firstPlayerProgress.answers.length - 1
+      ].addedAt,
     );
+
     const secondPlayerTime = new Date(
-      game.secondPlayerProgress!.answers.pop()!.addedAt,
+      game.secondPlayerProgress!.answers[
+        game.secondPlayerProgress!.answers.length - 1
+      ].addedAt,
     );
 
     if (
@@ -65,8 +70,6 @@ export class GetCurrentGameByIdHandler
     firstPlayerTime > secondPlayerTime
       ? (game.finishGameDate = firstPlayerTime)
       : (game.finishGameDate = secondPlayerTime);
-
-    console.log(2222220000, '-----------------------------', game);
 
     return game;
   }

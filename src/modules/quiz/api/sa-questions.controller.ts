@@ -12,20 +12,14 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { CommentUpdateDto } from 'src/modules/bloggers-platform/dto/comment/comment-update.dto';
 import { BasicAuthGuard } from 'src/modules/user-accounts/guards/basic/basi-auth.guard';
-import { ExtractUserFromRequest } from 'src/modules/user-accounts/guards/decorators/param/extract-user-from-request.decorator';
-import { UserContextDto } from 'src/modules/user-accounts/guards/dto/user-context.dto';
 import { QuestionInputDto } from '../dto/question/question-input.dto';
 import { CreateQuestionCommand } from '../application/usecases/questions/create-question.usecase';
 import { QuestionViewDto } from '../dto/question/question-view.dto';
 import { GetQuestionQuery } from '../application/usecases/questions/get-question.query-handler';
 import { UpdateQuestionCommand } from '../application/usecases/questions/update-question.usecase';
 import { QuestionUpdateStatusDto } from '../dto/question/question-update-status.dto';
-import {
-  UpdateQuestionStatusCommand,
-  UpdateQuestionStatusUseCase,
-} from '../application/usecases/questions/update-question-status.usecase';
+import { UpdateQuestionStatusCommand } from '../application/usecases/questions/update-question-status.usecase';
 import { DeleteQuestionCommand } from '../application/usecases/questions/delete-question.usecase';
 import { PaginatedViewDto } from 'src/core/dto/base.paginated.view-dto';
 import { QuestionsQueryRepository } from '../infrastructure/query/questions-query.repository';
@@ -36,8 +30,6 @@ export class SaQuestionsController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-    //  private usersService: UsersService,
-    //  private usersRepository: UsersRepository,
     private questionsQueryRepository: QuestionsQueryRepository,
   ) {}
 

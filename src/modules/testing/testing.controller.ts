@@ -19,7 +19,7 @@ export class TestingController {
     console.log('DELETE /api/testing/all-data вызван');
 
     await this.dataSource.query(`
-  TRUNCATE game, player_progress, question, answer, blog, comment, post, "like", session, "user", email_confirmation, password_recovery
+  TRUNCATE game, player_progress, question, game_question, answer, blog, comment, post, "like", session, "user", email_confirmation, password_recovery
   RESTART IDENTITY CASCADE;
 `);
 

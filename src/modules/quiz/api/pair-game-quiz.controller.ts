@@ -20,17 +20,15 @@ import { AnswerInputDto } from '../dto/answer/answer-input.dto';
 import { AnswerView } from '../dto/answer/answer-view';
 import { MakeAnswerCommand } from '../application/usecases/answers/make-answer.usecase';
 import { AnswersQueryRepository } from '../infrastructure/query/answers-query.repository';
-import { DomainException } from 'src/core/exceptions/domain-exceptions';
-import { DomainExceptionCode } from 'src/core/exceptions/domain-exception-codes';
 import { GetMyCurrentQuery } from '../application/usecases/games/get-my-current.query-handler';
-import { GetCurrentGameByIdQuery } from '../application/usecases/games/get-current-game-by-id.query-handler';
+import { GetGameByIdQuery } from '../application/usecases/games/get-current-game-by-id.query-handler';
 
 @Controller('pair-game-quiz/pairs')
 export class PairGameQuizController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-    //  private usersService: UsersService,
+
     private answersQueryRepository: AnswersQueryRepository,
     private gamesQueryRepository: GamesQueryRepository,
   ) {}
@@ -45,11 +43,7 @@ export class PairGameQuizController {
       new ConnectOrCreatePairCommand(user.id),
     );
 
-    //  return await this.queryBus.execute(new GetQuestionQuery(questionId));
-
     const game = await this.gamesQueryRepository.findByIdOrNotFoundFail(gameId);
-
-    // console.log(22222, game);
 
     return game;
   }
@@ -77,16 +71,7 @@ export class PairGameQuizController {
   async getCurrent(
     @ExtractUserFromRequest() user: UserContextDto,
   ): Promise<PostConnectionViewDto> {
-    // const game =
-    //   await this.gamesQueryRepository.findActiveOrPendingGameOrNotFoundFail(
-    //     user.id,
-    //   );
-
     return await this.queryBus.execute(new GetMyCurrentQuery(user.id));
-
-    // console.log(22222, game);
-
-    // return game;
   }
 
   @Get(':id')
@@ -102,25 +87,6 @@ export class PairGameQuizController {
       throw new BadRequestException('Invalid id format');
     }
 
-    // const game = await this.gamesQueryRepository.findByIdOrNotFoundFail(id);
-
-    // const isFirst = game.firstPlayerProgress?.player.id === user.id;
-    // const isSecond = game.secondPlayerProgress?.player.id === user.id;
-
-    // if (!isFirst && !isSecond) {
-    //   throw new DomainException({
-    //     code: DomainExceptionCode.Forbidden,
-    //     message: 'Forbidden',
-    //     extensions: [{ field: 'game', message: 'User is not in the game' }],
-    //   });
-    // }
-
-    // console.log(22222, game);
-
-    // return game;
-
-    return await this.queryBus.execute(
-      new GetCurrentGameByIdQuery(id, user.id),
-    );
+    return await this.queryBus.execute(new GetGameByIdQuery(id, user.id));
   }
 }

@@ -23,7 +23,8 @@ import { MakeAnswerUseCase } from './application/usecases/answers/make-answer.us
 import { AnswersRepository } from './infrastructure/answers.repository';
 import { AnswersQueryRepository } from './infrastructure/query/answers-query.repository';
 import { GetMyCurrentHandler } from './application/usecases/games/get-my-current.query-handler';
-import { GetCurrentGameByIdHandler } from './application/usecases/games/get-current-game-by-id.query-handler';
+import { GetGameByIdHandler } from './application/usecases/games/get-current-game-by-id.query-handler';
+import { GameQuestion } from './domain/game-question/game-question.entity';
 
 export const CommandHandlers = [
   CreateQuestionUseCase,
@@ -36,13 +37,19 @@ export const CommandHandlers = [
   //
   GetQuestionHandler,
   GetMyCurrentHandler,
-  GetCurrentGameByIdHandler,
+  GetGameByIdHandler,
 ];
 
 @Module({
   imports: [
     UserAccountsModule,
-    TypeOrmModule.forFeature([Game, PlayerProgress, Question, Answer]),
+    TypeOrmModule.forFeature([
+      Game,
+      PlayerProgress,
+      Question,
+      Answer,
+      GameQuestion,
+    ]),
   ],
   controllers: [SaQuestionsController, PairGameQuizController],
   providers: [

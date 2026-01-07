@@ -1,15 +1,8 @@
 import { BaseDomainEntity } from 'src/core/base-domain-entity/base-domain-entity';
-import {
-  Column,
-  Entity,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-import { Answer } from '../answer/answer.entity';
-import { Game } from '../game/game.entity';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { QuestionInputDto } from '../../dto/question/question-input.dto';
 import { QuestionUpdateStatusDto } from '../../dto/question/question-update-status.dto';
+import { GameQuestion } from '../game-question/game-question.entity';
 
 @Entity()
 export class Question extends BaseDomainEntity {
@@ -22,12 +15,9 @@ export class Question extends BaseDomainEntity {
   @Column({ default: false })
   publish: boolean;
 
-  // связь: один вопрос -> много ответов
-  @OneToMany(() => Answer, (answer) => answer.question, { cascade: true })
-  answers: Answer[];
-
-  @ManyToOne(() => Game, (game) => game.questions, { onDelete: 'CASCADE' })
-  game: Game;
+  // связь через промежуточную таблицу
+  @OneToMany(() => GameQuestion, (gq) => gq.question)
+  gameQuestions: GameQuestion[];
 
   static createInstance(dto: QuestionInputDto): Question {
     const question = new this();

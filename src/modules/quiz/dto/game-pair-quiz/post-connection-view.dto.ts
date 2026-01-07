@@ -29,8 +29,11 @@ export class PostConnectionViewDto {
         ? PostConnectionViewDto.mapProgress(game.secondPlayerProgress)
         : null,
       questions:
-        game.questions && game.questions.length > 0
-          ? game.questions.map((q) => ({ id: q.id.toString(), body: q.body }))
+        game.gameQuestions && game.gameQuestions.length > 0
+          ? game.gameQuestions.map((gq) => ({
+              id: gq.id.toString(),
+              body: gq.question.body,
+            }))
           : null,
     };
   }
@@ -45,7 +48,7 @@ export class PostConnectionViewDto {
       answers: pp.answers
         .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
         .map((a) => ({
-          questionId: a.question.id.toString(),
+          questionId: a.gameQuestion.id.toString(),
           answerStatus: a.status,
           addedAt: a.createdAt.toISOString(),
         })),

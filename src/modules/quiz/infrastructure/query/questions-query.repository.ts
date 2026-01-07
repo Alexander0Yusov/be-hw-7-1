@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Question } from '../../domain/question/question.entity';
 import { QuestionViewDto } from '../../dto/question/question-view.dto';
 import { GetQuestionsQueryParams } from '../../dto/question/get-questions-query-params.input-dto';
