@@ -15,6 +15,7 @@ export class CreateQuestionUseCase
 
   async execute({ dto }: CreateQuestionCommand): Promise<string> {
     const newQuestion = Question.createInstance(dto);
+
     const question = await this.questionsRepository.save(newQuestion);
 
     return String(question.id);

@@ -22,16 +22,21 @@ import { GamesQueryRepository } from './infrastructure/query/games-query.reposit
 import { MakeAnswerUseCase } from './application/usecases/answers/make-answer.usecase';
 import { AnswersRepository } from './infrastructure/answers.repository';
 import { AnswersQueryRepository } from './infrastructure/query/answers-query.repository';
+import { GetMyCurrentHandler } from './application/usecases/games/get-my-current.query-handler';
+import { GetCurrentGameByIdHandler } from './application/usecases/games/get-current-game-by-id.query-handler';
 
 export const CommandHandlers = [
   CreateQuestionUseCase,
   UpdateQuestionUseCase,
   UpdateQuestionStatusUseCase,
   DeleteQuestionUseCase,
-  GetQuestionHandler,
   //
   ConnectOrCreatePairUseCase,
   MakeAnswerUseCase,
+  //
+  GetQuestionHandler,
+  GetMyCurrentHandler,
+  GetCurrentGameByIdHandler,
 ];
 
 @Module({

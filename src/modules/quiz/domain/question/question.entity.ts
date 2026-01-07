@@ -34,6 +34,7 @@ export class Question extends BaseDomainEntity {
 
     question.body = dto.body;
     question.correctAnswers = dto.correctAnswers;
+    question.updatedAt = null;
 
     return question;
   }
@@ -41,9 +42,11 @@ export class Question extends BaseDomainEntity {
   update(dto: QuestionInputDto) {
     this.body = dto.body;
     this.correctAnswers = dto.correctAnswers;
+    this.updatedAt = new Date();
   }
 
   updateStatus(dto: QuestionUpdateStatusDto) {
     this.publish = dto.published;
+    this.updatedAt = new Date();
   }
 }

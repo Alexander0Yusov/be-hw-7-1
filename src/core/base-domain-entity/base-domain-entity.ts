@@ -1,4 +1,6 @@
 import {
+  BeforeUpdate,
+  Column,
   CreateDateColumn,
   DeleteDateColumn,
   PrimaryGeneratedColumn,
@@ -14,7 +16,11 @@ export abstract class BaseDomainEntity {
   @CreateDateColumn({ type: 'timestamptz' })
   public createdAt: Date;
 
-  @UpdateDateColumn({ type: 'timestamptz' })
+  @UpdateDateColumn({
+    type: 'timestamptz',
+    nullable: true,
+    default: null,
+  })
   public updatedAt: Date | null;
 
   @DeleteDateColumn({ type: 'timestamptz' })

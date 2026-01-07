@@ -26,8 +26,8 @@ export class ConnectOrCreatePairUseCase
   ) {}
 
   async execute({ userId }: ConnectOrCreatePairCommand): Promise<string> {
-    // проверка на участие в активной игре
-    if (await this.gamesRepository.findActiveGame(Number(userId))) {
+    // проверка на участие в активной игре или стояние в очереди
+    if (await this.gamesRepository.findActiveOrPendingGame(Number(userId))) {
       throw new DomainException({
         code: DomainExceptionCode.Forbidden,
         message: 'Forbidden',

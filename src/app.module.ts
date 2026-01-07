@@ -46,7 +46,7 @@ import { QuizModule } from './modules/quiz/quiz.module';
         {
           name: 'default',
           ttl: 10000,
-          limit: 5,
+          limit: 1000, // норма 5
         },
       ],
     }),

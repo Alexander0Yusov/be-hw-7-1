@@ -6,7 +6,7 @@ export class QuestionViewDto {
   correctAnswers: string[];
   published: boolean;
   createdAt: Date;
-  updatedAt: Date;
+  updatedAt: Date | null;
 
   static mapToView(question: Question): QuestionViewDto {
     const dto = new QuestionViewDto();
@@ -16,9 +16,7 @@ export class QuestionViewDto {
     dto.correctAnswers = question.correctAnswers;
     dto.published = question.publish;
     dto.createdAt = question.createdAt;
-    question.updatedAt
-      ? (dto.updatedAt = question.updatedAt)
-      : (dto.updatedAt = question.createdAt);
+    dto.updatedAt = question.updatedAt;
 
     return dto;
   }

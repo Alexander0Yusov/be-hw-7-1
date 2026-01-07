@@ -36,4 +36,17 @@ export class GamesRepository {
 
     return activeGame;
   }
+
+  async findActiveOrPendingGame(userId: number): Promise<Game | null> {
+    const game = await this.gameRepo
+      .createQueryBuilder('game')
+      .leftJoin('game.firstPlayerProgress', 'fpp')
+      .leftJoin('game.secondPlayerProgress', 'spp')
+      .where('(fpp.userId = :userId OR spp.userId = :userId)', { userId })
+      .andWhere('game.status IN (:...statuses)', {
+        statuses: [GameStatuses.Active, GameStatuses.PendingSecondPlayer],
+      })
+      .getOne();
+    return game;
+  }
 }

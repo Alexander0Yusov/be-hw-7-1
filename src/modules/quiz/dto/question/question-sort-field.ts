@@ -1,6 +1,6 @@
 export enum QuestionSortField {
   CreatedAt = 'createdAt',
-  // Name = 'name',
+  Body = 'body',
 }
 
 export enum PublishedStatus {

@@ -51,6 +51,8 @@ describe('users (e2e)', () => {
       .auth('admin', 'qwerty')
       .expect(HttpStatus.CREATED);
 
+    console.log(4444444, createdQuestion.body);
+
     //
     const newQuestion_2 = {
       body: 'capital of USA',
@@ -106,7 +108,7 @@ describe('users (e2e)', () => {
     // get all questions
     const ff = await request(app.getHttpServer())
       .get(
-        `/${GLOBAL_PREFIX}/sa/quiz/questions?bodySearchTerm=cap&publishedStatus=all`,
+        `/${GLOBAL_PREFIX}/sa/quiz/questions?bodySearchTerm=cap&publishedStatus=notPublished&pageSize=8&pageNumber=1&sortDirection=desc&sortBy=body`,
       )
       .auth('admin', 'qwerty')
       .expect(HttpStatus.OK);
@@ -122,6 +124,7 @@ describe('users (e2e)', () => {
 
   let accessToken_1;
   let accessToken_2;
+  let createdGame;
 
   it('should create game', async () => {
     // создание и логин юзера 1
@@ -142,10 +145,16 @@ describe('users (e2e)', () => {
     accessToken_1 = loginResponse.body.accessToken;
 
     // создание игры
-    const createGame = await request(app.getHttpServer())
+    createdGame = await request(app.getHttpServer())
       .post(`/${GLOBAL_PREFIX}/pair-game-quiz/pairs/connection`)
       .auth(accessToken_1, { type: 'bearer' })
       .expect(HttpStatus.OK);
+
+    // попытка создать вторую игру и получение ошибки 403
+    await request(app.getHttpServer())
+      .post(`/${GLOBAL_PREFIX}/pair-game-quiz/pairs/connection`)
+      .auth(accessToken_1, { type: 'bearer' })
+      .expect(HttpStatus.FORBIDDEN);
   });
 
   it('should connect to game', async () => {
@@ -166,7 +175,7 @@ describe('users (e2e)', () => {
     // accessToken из тела
     accessToken_2 = loginResponse_2.body.accessToken;
 
-    // создание игры
+    // закрытие пары для игры
     const connectToGame = await request(app.getHttpServer())
       .post(`/${GLOBAL_PREFIX}/pair-game-quiz/pairs/connection`)
       .auth(accessToken_2, { type: 'bearer' })
@@ -175,14 +184,67 @@ describe('users (e2e)', () => {
 
   it('should make answer', async () => {
     // создание ответа
-    const answer = {
+    const answer_2 = {
       answer: 'washington',
+    };
+    const answer_3 = {
+      answer: 'madrid',
+    };
+    const answer_4 = {
+      answer: 'tirana',
     };
 
     await request(app.getHttpServer())
       .post(`/${GLOBAL_PREFIX}/pair-game-quiz/pairs/my-current/answers`)
-      .send(answer)
+      .send(answer_2)
+      .auth(accessToken_1, { type: 'bearer' })
+      .expect(HttpStatus.OK);
+
+    await request(app.getHttpServer())
+      .post(`/${GLOBAL_PREFIX}/pair-game-quiz/pairs/my-current/answers`)
+      .send(answer_3)
+      .auth(accessToken_1, { type: 'bearer' })
+      .expect(HttpStatus.OK);
+
+    await request(app.getHttpServer())
+      .post(`/${GLOBAL_PREFIX}/pair-game-quiz/pairs/my-current/answers`)
+      .send(answer_4)
+      .auth(accessToken_1, { type: 'bearer' })
+      .expect(HttpStatus.OK);
+
+    //------------
+
+    await request(app.getHttpServer())
+      .post(`/${GLOBAL_PREFIX}/pair-game-quiz/pairs/my-current/answers`)
+      .send(answer_2)
+      .auth(accessToken_2, { type: 'bearer' })
+      .expect(HttpStatus.OK);
+
+    await request(app.getHttpServer())
+      .post(`/${GLOBAL_PREFIX}/pair-game-quiz/pairs/my-current/answers`)
+      .send(answer_3)
+      .auth(accessToken_2, { type: 'bearer' })
+      .expect(HttpStatus.OK);
+  });
+
+  it('should not return game by id', async () => {
+    await request(app.getHttpServer())
+      .get(`/${GLOBAL_PREFIX}/pair-game-quiz/pairs/${'ggggg'}`) // createdGame.body.id
+      .auth(accessToken_1, { type: 'bearer' })
+      .expect(HttpStatus.BAD_REQUEST);
+  });
+
+  it('should not return game by id', async () => {
+    await request(app.getHttpServer())
+      .get(`/${GLOBAL_PREFIX}/pair-game-quiz/pairs/${createdGame.body.id}`) //
       .auth(accessToken_1, { type: 'bearer' })
       .expect(HttpStatus.OK);
   });
+
+  // it('should return my active game', async () => {
+  //   await request(app.getHttpServer())
+  //     .get(`/${GLOBAL_PREFIX}/pair-game-quiz/pairs/my-current`)
+  //     .auth(accessToken_1, { type: 'bearer' })
+  //     .expect(HttpStatus.OK);
+  // });
 });

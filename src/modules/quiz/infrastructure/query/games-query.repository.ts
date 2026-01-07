@@ -34,4 +34,31 @@ export class GamesQueryRepository {
 
     return PostConnectionViewDto.mapFrom(game);
   }
+
+  async findActiveOrPendingGameOrNotFoundFail(
+    userId: string,
+  ): Promise<PostConnectionViewDto> {
+    const activeGame = await this.gameRepo
+      .createQueryBuilder('game')
+      .leftJoinAndSelect('game.firstPlayerProgress', 'fpp')
+      .leftJoinAndSelect('fpp.user', 'fppUser') // ← добавлено
+      .leftJoinAndSelect('fpp.answers', 'fppAnswers')
+      .leftJoinAndSelect('fppAnswers.question', 'fppAnswerQuestion') // ← добавлено
+      .leftJoinAndSelect('game.secondPlayerProgress', 'spp')
+      .leftJoinAndSelect('spp.user', 'sppUser') // ← добавлено
+      .leftJoinAndSelect('spp.answers', 'sppAnswers')
+      .leftJoinAndSelect('sppAnswers.question', 'sppAnswerQuestion') // ← добавлено
+      .leftJoinAndSelect('game.questions', 'questions')
+      .where('(fpp.userId = :userId OR spp.userId = :userId)', { userId })
+      .andWhere('game.status IN (:...statuses)', {
+        statuses: [GameStatuses.Active, GameStatuses.PendingSecondPlayer],
+      })
+      .getOne();
+
+    if (!activeGame) {
+      throw new NotFoundException('Game not found');
+    }
+
+    return PostConnectionViewDto.mapFrom(activeGame);
+  }
 }

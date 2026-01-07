@@ -62,7 +62,7 @@ export class Game extends BaseDomainEntity {
     const randomQuestions = await questionRepo
       .createQueryBuilder('q')
       .orderBy('RANDOM()')
-      .limit(2)
+      .limit(5)
       .getMany();
 
     randomQuestions.sort((a, b) => a.id - b.id).forEach((q) => (q.game = this));

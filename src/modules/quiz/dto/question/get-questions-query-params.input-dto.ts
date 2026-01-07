@@ -11,7 +11,7 @@ export class GetQuestionsQueryParams extends BaseQueryParams {
   @IsEnum(PublishedStatus)
   publishedStatus: PublishedStatus = PublishedStatus.All;
 
-  @IsString()
   @IsOptional()
+  @IsString()
   bodySearchTerm: string | null = null;
 }
