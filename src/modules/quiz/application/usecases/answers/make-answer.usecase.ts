@@ -9,6 +9,7 @@ import {
 } from 'src/modules/quiz/dto/game-pair-quiz/answer-status';
 import { AnswersRepository } from 'src/modules/quiz/infrastructure/answers.repository';
 import { GamesRepository } from 'src/modules/quiz/infrastructure/games.repository';
+import { PlayerProgressRepository } from 'src/modules/quiz/infrastructure/player-progress.repository';
 
 export class MakeAnswerCommand {
   constructor(
@@ -24,6 +25,7 @@ export class MakeAnswerUseCase
   constructor(
     private gamesRepository: GamesRepository,
     private answersRepository: AnswersRepository,
+    private playerProgressRepository: PlayerProgressRepository,
   ) {}
 
   async execute({ dto, userId }: MakeAnswerCommand): Promise<string | null> {
@@ -38,8 +40,8 @@ export class MakeAnswerUseCase
       });
     }
 
-    // заранее имеет оба прогресса
-    const playerProgress =
+    // заранее имеем оба прогресса
+    const currentPlayerProgress =
       game.firstPlayerProgress.userId === Number(userId)
         ? game.firstPlayerProgress
         : game.secondPlayerProgress;
@@ -50,7 +52,7 @@ export class MakeAnswerUseCase
         : game.secondPlayerProgress;
 
     // имеем массивы вопросов и ответов
-    const answersArr = playerProgress.answers;
+    const answersArr = currentPlayerProgress.answers;
     const gameQuestionsArr = game.gameQuestions.sort(
       (a, b) => a.question.createdAt.getTime() - b.question.createdAt.getTime(),
     );
@@ -106,12 +108,12 @@ export class MakeAnswerUseCase
       : AnswerStatuses.Incorrect;
 
     // создаем сущность ответа
-    // вписываем ответ со статусом, даем балл и сохраняем сущность
+    // вписываем ответ со статусом и сохраняем сущность
     const newAnswer = Answer.createInstance(
       dto.answer,
       answerStatus,
       firstQuestionWithoutAnswer.id,
-      playerProgress.id,
+      currentPlayerProgress.id,
     );
 
     const answer = await this.answersRepository.save(newAnswer);
@@ -123,33 +125,37 @@ export class MakeAnswerUseCase
       body: answer.body,
     });
 
-    playerProgress.answers.push(answer);
+    currentPlayerProgress.answers.push(answer);
 
     console.log(
       'Все ответы игрока:',
-      playerProgress.answers.map((a) => ({
+      currentPlayerProgress.answers.map((a) => ({
         id: a.id,
         qId: a.gameQuestionId,
         status: a.status,
       })),
     );
 
-    // достать из прогресса очки и посчитать
-    const playerScore = playerProgress.answers.filter(
-      (answer) => answer.status === AnswerStatuses.Correct,
-    ).length;
+    // прибавляем 1 очко в прогрессе
+    if (answerStatus === AnswerStatuses.Correct) {
+      currentPlayerProgress.incrementScore();
+      await this.playerProgressRepository.save(currentPlayerProgress);
+    }
 
     console.log('Статус ответа:', answerStatus);
-    console.log('Счёт до начисления:', playerScore);
+    console.log('Баллов на счету:', currentPlayerProgress.score);
 
     // если этот ответ стал последним для обоих
-    // то меняем статус игры и считаем очки
-    // если оба игрока ответили на все вопросы
+    // то меняем статус игры
     if (
       otherPlayerProgress.answers.length === game.gameQuestions.length &&
-      playerProgress.answers.length === game.gameQuestions.length
+      currentPlayerProgress.answers.length === game.gameQuestions.length
     ) {
-      game.status = GameStatuses.Finished;
+      // значит другой игрок справился раньше и ему присуждается бонус+1
+      otherPlayerProgress.incrementScore();
+      await this.playerProgressRepository.save(otherPlayerProgress);
+
+      game.finish();
       await this.gamesRepository.save(game);
     }
 

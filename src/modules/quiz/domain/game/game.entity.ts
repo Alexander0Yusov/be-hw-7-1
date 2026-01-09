@@ -32,6 +32,9 @@ export class Game extends BaseDomainEntity {
   })
   status: GameStatuses;
 
+  @Column({ type: 'timestamptz', default: null })
+  finishGameDate: Date | null;
+
   static createInstance(firstPlayerId: number): Game {
     const game = new this();
 
@@ -74,5 +77,12 @@ export class Game extends BaseDomainEntity {
         gq.question = q; // привязка к вопросу из пула
         return gq;
       });
+  }
+
+  finish() {
+    this.status = GameStatuses.Finished;
+
+    // или время последнего ответа или дедлайн
+    this.finishGameDate = new Date();
   }
 }

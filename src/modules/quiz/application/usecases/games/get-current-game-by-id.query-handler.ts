@@ -35,42 +35,6 @@ export class GetGameByIdHandler
       });
     }
 
-    if (game.status !== GameStatuses.Finished) {
-      return game;
-    }
-
-    // при условии что статус игры "окончена", находим чей последний ответ был раньше,
-    // добавляем 1 балл
-    const firstPlayerTime = new Date(
-      game.firstPlayerProgress.answers[
-        game.firstPlayerProgress.answers.length - 1
-      ].addedAt,
-    );
-
-    const secondPlayerTime = new Date(
-      game.secondPlayerProgress!.answers[
-        game.secondPlayerProgress!.answers.length - 1
-      ].addedAt,
-    );
-
-    if (
-      firstPlayerTime > secondPlayerTime &&
-      game.secondPlayerProgress!.score > 0
-    ) {
-      game.secondPlayerProgress!.score = game.secondPlayerProgress!.score + 1;
-    }
-
-    if (
-      firstPlayerTime < secondPlayerTime &&
-      game.firstPlayerProgress!.score > 0
-    ) {
-      game.firstPlayerProgress!.score = game.firstPlayerProgress!.score + 1;
-    }
-
-    firstPlayerTime > secondPlayerTime
-      ? (game.finishGameDate = firstPlayerTime)
-      : (game.finishGameDate = secondPlayerTime);
-
     return game;
   }
 }
